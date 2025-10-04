@@ -1,8 +1,7 @@
-package utility;
+package words;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import words.DictionaryEntry;
 
 import java.io.IOException;
 import java.net.URI;
@@ -11,7 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-public class DictionaryFetcher {
+public final class DictionaryFetcher {
     private final HttpClient client;
 
     public DictionaryFetcher() {
@@ -20,11 +19,11 @@ public class DictionaryFetcher {
 
     // Creates json string from call to dictionary API and returns list of all entries matching the word argument
     //& Insert logic for multiple entries? Could be tedious
-    public List<DictionaryEntry> fetchEntry(String word) throws IOException, InterruptedException {
+    public void fetchEntry(String word) throws IOException, InterruptedException {
 
         // Build request
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://www.dictionaryapi.com/api/v3/references/collegiate/json/" + word + "?key=91b9d99d-1e37-494a-b59a-4ffc58efa02f"))
+                .uri(URI.create("https://www.dictionaryapi.com/api/v3/references/collegiate/json/" + word.toLowerCase() + "?key=91b9d99d-1e37-494a-b59a-4ffc58efa02f"))
                 .GET()
                 .build();
 
@@ -33,7 +32,8 @@ public class DictionaryFetcher {
         String jsonString = response.body();
 
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonString, new TypeReference<List<DictionaryEntry>>() {} );
+        DictionaryEntries.getInstance().addEntries(mapper.readValue(jsonString, new TypeReference<List<DictionaryEntry>>() {} ));
+
     }
 }
 

@@ -7,17 +7,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DictionaryEntry {
 
     @JsonProperty("hwi")
-    private String word;
+    private Hwi hwi;
 
     @JsonProperty("fl")
     private String speechPart;
 
     public String getWord() {
-        return word;
+        return (this.hwi == null ? null :hwi.getHw());
     }
 
     public String getSpeechPart() {
         return speechPart;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Word: %s\nPart of speech: %s\n", hwi, speechPart);
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public class Hwi {
+        private String hw;
+        public String getHw() { return hw; }
+    }
+
 
 }

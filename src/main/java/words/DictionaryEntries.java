@@ -1,15 +1,16 @@
 package words;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+// Singleton list of all processed words
 
 public final class DictionaryEntries {
 
-    private static final Map<String, DictionaryEntry> entryMap = new HashMap<>();
+    private static final Map<String, List<DictionaryEntry>> entryMap = new HashMap<>();
 
-    public Map<String, DictionaryEntry> getEntryMap() {
+    private DictionaryEntries() {}
+
+    public Map<String, List<DictionaryEntry>> getEntryMap() {
         return Collections.unmodifiableMap(entryMap);
     }
 
@@ -20,14 +21,31 @@ public final class DictionaryEntries {
         }
         for (DictionaryEntry entry : entries) {
             if (entry == null) continue;
-            entryMap.put(entry.getWord(), entry);
+            if (entryMap.containsKey(entry.getWord())) {
+                entryMap.get(entry.getWord()).add(entry);
+            }
+            else {
+                entryMap.put(entry.getWord(), new ArrayList<>());
+            }
+
         }
+        System.out.println(entryMap);
     }
 
-    void addEntry(DictionaryEntry entry) {
-        if (entry == null) return;
-        entryMap.put(entry.getWord(), entry);
+//    void addEntry(DictionaryEntry entry) {
+//        if (entry == null) return;
+//        entryMap.put(entry.getWord(), entry);
+//    }
+
+    public static DictionaryEntries getInstance() {
+        return Holder.INSTANCE;
     }
+
+    private static class Holder {
+        private static final DictionaryEntries INSTANCE = new DictionaryEntries();
+    }
+
+
 
 
 }
