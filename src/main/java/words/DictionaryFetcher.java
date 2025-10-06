@@ -2,13 +2,16 @@ package words;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import utility.exceptions.NullEntryException;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class DictionaryFetcher {
     private final HttpClient client;
@@ -19,7 +22,7 @@ public final class DictionaryFetcher {
 
     // Creates json string from call to dictionary API and returns list of all entries matching the word argument
     //& Insert logic for multiple entries? Could be tedious
-    public void fetchEntry(String word) throws IOException, InterruptedException {
+    public void fetchEntry(String word) throws IOException, InterruptedException, NullEntryException {
 
         // Build request
         HttpRequest request = HttpRequest.newBuilder()
@@ -32,8 +35,14 @@ public final class DictionaryFetcher {
         String jsonString = response.body();
 
         ObjectMapper mapper = new ObjectMapper();
-        DictionaryEntries.getInstance().addEntries(mapper.readValue(jsonString, new TypeReference<List<DictionaryEntry>>() {} ));
-
+        List<DictionaryEntry> wordList = mapper.readValue(jsonString, new TypeReference<List<DictionaryEntry>>() {} );
+        Set<String> partsOfSpeech = new HashSet<>();
+        for (DictionaryEntry entry : wordList) {
+            if (entry.getMetaId().contains(word + ":")) {
+                partsOfSpeech.add(entry.getPartOfSpeech());
+            }
+        }
+        DictionaryEntries.getInstance().addEntries(word, partsOfSpeech);
     }
 }
 
