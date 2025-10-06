@@ -12,17 +12,16 @@ import java.net.http.HttpResponse;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
-public final class DictionaryFetcher {
-    private final HttpClient client;
+public enum  DictionaryFetcher {
+    INSTANCE;
 
-    public DictionaryFetcher() {
-        client = HttpClient.newHttpClient();
-    }
+    private static final HttpClient client = HttpClient.newHttpClient();
 
     // Creates json string from call to dictionary API and returns list of all entries matching the word argument
     //& Insert logic for multiple entries? Could be tedious
-    public void fetchEntry(String word) throws IOException, InterruptedException, NullEntryException {
+    public static void fetchEntry(String word) throws IOException, InterruptedException, NullEntryException {
 
         // Build request
         HttpRequest request = HttpRequest.newBuilder()
@@ -38,11 +37,15 @@ public final class DictionaryFetcher {
         List<DictionaryEntry> wordList = mapper.readValue(jsonString, new TypeReference<List<DictionaryEntry>>() {} );
         Set<String> partsOfSpeech = new HashSet<>();
         for (DictionaryEntry entry : wordList) {
-            if (entry.getMetaId().contains(word + ":")) {
+            if (entry.getMetaId().contains(word + ":") || entry.getMetaVariations().contains(word)) {
                 partsOfSpeech.add(entry.getPartOfSpeech());
             }
         }
         DictionaryEntries.getInstance().addEntries(word, partsOfSpeech);
+    }
+
+    public static DictionaryFetcher getInstance() {
+        return INSTANCE;
     }
 }
 
