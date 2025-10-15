@@ -1,20 +1,19 @@
 package generator;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.CoreSentence;
-import tagger.AnnotatedText;
+import tagger.TextAnnotater;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public abstract class Madlibifier {
 
     // int skipper determines the frequency of madlibification
     // Example: if skipper == 3, madlibify will clear every third madlibifiable word
-    public static void madlibify(AnnotatedText text, String filepath, int skipper) throws IOException {
+    public static ArrayList<String> removeMadlibifiables(TextAnnotater text, String filepath, int skipper) throws IOException {
         if (skipper < 1) {
             skipper = 1;
             System.out.println("Invalid skip increment. Skip increment auto set to 1.");
@@ -22,6 +21,8 @@ public abstract class Madlibifier {
         int i = 1;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))) {
             String replacementBlock;
+            // posList stores parts of speech for each removed word; list is passed to method that prompts user to input replacement words based on the POS
+            ArrayList<String> posList = new ArrayList<>();
             for (CoreLabel token : text.getDocument().tokens()) {
 
                 // Retrieve the [part of speech block] to replace the word in the new madlib
@@ -38,7 +39,8 @@ public abstract class Madlibifier {
                 // the skipper count resets after a word is madlibified
                 else {
                     if (replacementBlock != null) {
-                        writer.write(replacementBlock + " ");
+                        writer.write("[" + replacementBlock + "] ");
+                        posList.add(replacementBlock);
                         i = 1;
                     }
                     else {
@@ -46,13 +48,17 @@ public abstract class Madlibifier {
                     }
                 }
             }
+            return posList;
+        }
+        catch (Exception e) {
+            throw new IOException("Madlibification failed. Please try again");
         }
     }
 
 
     public static void main(String[] args) throws IOException {
-        AnnotatedText newText = new AnnotatedText("On a crisp autumn morning, Emily wandered through Central Park, admiring the golden leaves that danced gently in the breeze. She paused beside a quiet pond, where ducks glided lazily across the water. Suddenly, her phone buzzed — a reminder that she was already late for her meeting downtown. With a sigh, she tightened her scarf, picked up her pace, and disappeared into the bustling crowd.");
-        madlibify(newText, "/Users/adambarnett/Coding/MadlibMachine/madlib-machine/src/moose.txt", 3);
+        TextAnnotater newText = new TextAnnotater("On a crisp autumn morning, Emily wandered through Central Park, admiring the golden leaves that danced gently in the breeze. She paused beside a quiet pond, where ducks glided lazily across the water. Suddenly, her phone buzzed — a reminder that she was already late for her meeting downtown. With a sigh, she tightened her scarf, picked up her pace, and disappeared into the bustling crowd.");
+        removeMadlibifiables(newText, "/Users/adambarnett/Coding/MadlibMachine/madlib-machine/src/moose.txt", 5);
     }
 
 

@@ -1,0 +1,60 @@
+package userinterface;
+
+import generator.Madlibifier;
+import generator.PosRemover;
+import tagger.TextAnnotater;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public enum userController {
+    INSTANCE;
+
+    private static final Scanner SCANNER = new Scanner(System.in);
+
+    private static final Pattern DIGITS = Pattern.compile("[0-9]");
+
+    // Prompts user to enter missing parts of speech to populate madlib
+    public void promptPOS() {
+
+    }
+
+    public static void loadStartingMenu() throws IOException {
+        System.out.println("Welcome to the Madlib Machine!");
+        System.out.println();
+
+        System.out.println("Please enter filepath of .txt file: ");
+        String filename = SCANNER.nextLine();
+        File originalText = new File(filename);
+        // identifies parts of speech for each word of the given file
+        TextAnnotater annotater = new TextAnnotater(originalText);
+
+        System.out.println("What would you like to save your new madlib as?");
+        String newFilename = SCANNER.nextLine() + ".txt";
+
+        System.out.println("How many madlibifiable words would you like to ignore? The lower the number, the more words you'll need to replace");
+
+        // while parsing the desired text, skipMadlibifiables represents how many madlibifiable words will be skipped before a madlibifiable word is blanked
+        // skipMadlibifiables is limited to 9; 0 results in original text
+        String skipMadlibifiables = SCANNER.nextLine();
+        Matcher matcher = DIGITS.matcher(skipMadlibifiables);
+
+        while (!matcher.matches()) {
+            System.out.println("Please enter a number 0 through 9");
+            skipMadlibifiables = SCANNER.nextLine();
+            matcher = DIGITS.matcher(skipMadlibifiables);
+        }
+
+        ArrayList<String> posList = Madlibifier.removeMadlibifiables(new TextAnnotater(originalText), filename, Integer.getInteger(skipMadlibifiables));
+        List<String> userWords = PosPrompter.fillInMadlib(posList);
+    }
+
+    public static Scanner getScanner() {
+        return SCANNER;
+    }
+}

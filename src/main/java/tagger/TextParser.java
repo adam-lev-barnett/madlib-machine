@@ -12,7 +12,9 @@ import edu.stanford.nlp.trees.*;
 public enum TextParser {
     INSTANCE;
 
+    /** Properties for CoreNLP are set to pair each word parsed (separated by white space) only with its part of speech*/
     private final static Properties props = new Properties();
+    /** Pipeline object is responsible for feeding the text file through the annotator*/
     private final static StanfordCoreNLP pipeline;
 
     static {
