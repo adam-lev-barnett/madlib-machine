@@ -1,16 +1,14 @@
-import generator.TextParser;
+import userinterface.UserController;
 import utility.exceptions.NullEntryException;
-import words.DictionaryFetcher;
-import words.DictionaryEntries;
 
 import java.io.IOException;
 
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException, NullEntryException {
-        TextParser.parseTextForEntries("/Users/adambarnett/Coding/MadlibMachine/madlib-machine/test1.txt");
+        UserController.initiateMadlibCreation();
+        // System.out.println("Writing file to: " + new File("boop").getAbsolutePath());
 
-        System.out.println(DictionaryEntries.getInstance());
 
     }
 }

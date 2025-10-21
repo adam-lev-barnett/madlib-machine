@@ -1,20 +1,18 @@
 package userinterface;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public abstract class PosPrompter {
 
-    private static final Scanner scanner = userController.getScanner();
+    private static final Scanner scanner = UserController.getScanner();
 
     // Prompts user for words for each needed part of speech; returns list used to repopulate madlib with new words
-    public static List<String> fillInMadlib(List<String> posList) {
+    public static Queue<String> fillInMadlib(List<String> posList) {
         System.out.println("Please enter a word for each of the following parts of speech:");
-        List<String> wordList = new ArrayList<>();
+        Queue<String> wordList = new ArrayDeque<>();
         for (String pos : posList) {
             System.out.println(pos + ": ");
-            wordList.add(scanner.nextLine());
+            if (pos != null) wordList.add(scanner.nextLine());
         }
         return wordList;
     }

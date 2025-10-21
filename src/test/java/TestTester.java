@@ -4,10 +4,6 @@ import java.util.*;
 
 public class TestTester {
 
-    @Test
-    public void testerTest() {
-        assertEquals();
-    }
 
 
 }

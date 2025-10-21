@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 public abstract class PosRemover {
 
+    // Takes annotated part of speech and replaces the parts of speech included in the map with blocks formatted like "[noun]"
+
     private static final HashMap<String, String> posReplacements = new HashMap<>();
 
     // Does not include proper nouns yet
@@ -12,15 +14,15 @@ public abstract class PosRemover {
 
     static {
         posReplacements.put("NN", "noun");
-        posReplacements.put("NNS", "plural noun");
+        posReplacements.put("NNS", "pluralNoun");
         posReplacements.put("VB", "verb");
-        posReplacements.put("VBD", "verb, past-tense");
-        posReplacements.put("VBG", "gerund");
-        posReplacements.put("VBZ", "verb ending in \"s\"");
+        posReplacements.put("VBD", "verbPast");
+        // posReplacements.put("VBG", "gerund");
+        posReplacements.put("VBZ", "verbEndingInS");
         posReplacements.put("JJ", "adjective");
-        posReplacements.put("JJR", "adjective ending in \"er\"");
+        // posReplacements.put("JJR", "adjective ending in \"er\"");
         posReplacements.put("RB", "adverb");
-        posReplacements.put("RBS", "adverb ending in \"est\"");
+        // posReplacements.put("RBS", "adverb ending in \"est\"");
         posReplacements.put("UH", "interjection");
     }
 
