@@ -3,6 +3,7 @@ package generator;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import tagger.TextAnnotater;
+import utility.exceptions.TextNotProcessedException;
 
 import java.io.*;
 import java.util.*;
@@ -15,6 +16,7 @@ public abstract class Madlibifier {
 
 
     static {
+        // The parts os speech to blank out and their associated text blocks; when commented out, madlibifier doesn't consider it a madlibifiable word
         posBlocks.add("[noun]");
         posBlocks.add("[pluralNoun]");
         posBlocks.add("[verb]");
@@ -37,13 +39,16 @@ public abstract class Madlibifier {
         wordsToSkip.add("has");
         wordsToSkip.add("had");
         wordsToSkip.add("shall");
-
     }
 
+    // Removes the skipper-th word with a part of speech in the posBlocks hashset
     // int skipper determines the frequency of madlibification
     // Example: if skipper == 3, madlibify will clear every third madlibifiable word
     // returns ArrayList of parts of speech removed so user can replace the removed words when prompted by CLI
-    public static ArrayList<String> removeMadlibifiables(TextAnnotater text, String filepath, int skipper) throws IOException {
+    public static ArrayList<String> removeMadlibifiables(TextAnnotater text, String filepath, int skipper) throws IOException, TextNotProcessedException {
+
+        if (text == null) throw new TextNotProcessedException("Madlib machine encountered an error. Unable to process text to detect parts of speech.");
+
         if (skipper < 1) {
             skipper = 1;
             System.out.println("Invalid skip increment. Skip increment auto set to 1.");
@@ -80,6 +85,7 @@ public abstract class Madlibifier {
                     }
                 }
             }
+            System.out.println("Madlib skeleton successfully generated in src folder");
             return posList;
         }
         catch (Exception e) {
