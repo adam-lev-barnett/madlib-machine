@@ -14,7 +14,6 @@ public abstract class Madlibifier {
     private static final Set<String> posBlocks = new HashSet<>();
     private static final Set<String> wordsToSkip = new HashSet<>();
 
-
     static {
         // The parts os speech to blank out and their associated text blocks; when commented out, madlibifier doesn't consider it a madlibifiable word
         posBlocks.add("[noun]");
