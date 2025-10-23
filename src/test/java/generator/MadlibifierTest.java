@@ -1,4 +1,5 @@
-import generator.Madlibifier;
+package generator;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,6 +12,33 @@ import java.nio.file.Path;
 
 public class MadlibifierTest {
 
+    @TempDir
+    Path tempDir;
+    Path testTextFile;
+    Path outputFile1, outputFile2, outputFile3, outputFile4, outputFile5, outputFile6;
+    TextAnnotater annotatedText;
+
+    @BeforeEach
+    void initializeTempFiles() throws IOException {
+        // Create temp directory and files
+        testTextFile = tempDir.resolve("outText.txt");
+
+        outputFile1 = tempDir.resolve("test1.txt");
+        outputFile2 = tempDir.resolve("test2.txt");
+        outputFile3 = tempDir.resolve("test3.txt");
+        outputFile4 = tempDir.resolve("test4.txt");
+        outputFile5 = tempDir.resolve("test5.txt");
+        outputFile6 = tempDir.resolve("test6.txt");
+
+        // Write sample text
+        String textForFile = "Greetings, person. I ran to the gym today and chewed some gum. Do you want a baloney sandwich?";
+        Files.writeString(testTextFile, textForFile);
+
+        // Create the annotated text
+        annotatedText = new TextAnnotater(testTextFile);
+
+    }
+
     @Test
     void testRemoveMadlibifiables(@TempDir Path tempDir) throws IOException, TextNotProcessedException {
 
@@ -21,24 +49,6 @@ public class MadlibifierTest {
         String expectedOutput4 = "Greetings, person. I ran to the [noun] today and chewed some gum. Do you [verb] a baloney sandwich?";
         String expectedOutput5 = "Greetings, person. I ran to the gym today and chewed some gum. Do you want a baloney sandwich?";
         String expectedOutput6 = "[pluralNoun], [noun]. I [verbPast] to the [noun] [noun] and [verbPast] some [noun]. Do you [verb] a [noun] [noun]?";
-
-        // Create temp directory and file to store text to be madlibified
-        Path testTextFile = tempDir.resolve("outText.txt");
-
-        // Test outputs for each skipper interval
-        Path outputFile1 = tempDir.resolve("test1.txt");
-        Path outputFile2 = tempDir.resolve("test2.txt");
-        Path outputFile3 = tempDir.resolve("test3.txt");
-        Path outputFile4 = tempDir.resolve("test4.txt");
-        Path outputFile5 = tempDir.resolve("test5.txt");
-        Path outputFile6 = tempDir.resolve("test6.txt");
-
-        // Text contained in new document for comparison
-        String textForFile = "Greetings, person. I ran to the gym today and chewed some gum. Do you want a baloney sandwich?";
-        Files.writeString(testTextFile, textForFile);
-
-        // Convert text file to TextAnnotator object so CoreNLP can identify parts of speech and tag each word in the file with the POS (CoreNLP refers to it as annotating)
-        TextAnnotater annotatedText = new TextAnnotater(testTextFile);
 
         // Remove every madlibifiable word from textForFile, and continue skipping 1 more per test
         Madlibifier.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);

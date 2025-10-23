@@ -83,10 +83,7 @@ public abstract class Madlibifier {
                 // the skipper count resets after a word is madlibified
                 else {
                     if (replacementBlock != null) {
-                        if (isFirstWord) {
-                            writer.write("[" + replacementBlock + "]");
-                        }
-                        else writer.write(" [" + replacementBlock + "]");
+                        replaceWordWithBlock(isFirstWord, writer, replacementBlock);
                         posList.add(replacementBlock);
                         i = 1;
                     }
@@ -103,11 +100,18 @@ public abstract class Madlibifier {
         }
     }
 
+    static void replaceWordWithBlock(boolean isFirstWord, BufferedWriter writer, String replacementBlock) throws IOException {
+        if (isFirstWord) {
+            writer.write("[" + replacementBlock + "]");
+        }
+        else writer.write(" [" + replacementBlock + "]");
+    }
+
     // Adds space before each word for simple avoidance of spaces before punctuation
     // Nothing is added to the punctuation character
 
     /** Helper method for removeMadlibifiable() that writes each word to a file with a preceding space*/
-    private static void justWriteWord(CoreLabel token, BufferedWriter writer, boolean isFirstWord) throws IOException {
+    static void justWriteWord(CoreLabel token, BufferedWriter writer, boolean isFirstWord) throws IOException {
 
         if (token.word().matches("\\p{Punct}") || isFirstWord) {
             writer.write(token.get(CoreAnnotations.TextAnnotation.class));
