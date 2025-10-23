@@ -15,14 +15,12 @@ public class MadlibifierTest {
     void testRemoveMadlibifiables(@TempDir Path tempDir) throws IOException, TextNotProcessedException {
 
         //TODO remove opening space
-        String expectedOutput1 = " [pluralNoun], [noun]. I [verbPast] to the [noun] [noun] and [verbPast] some [noun]. Do you [verb] a [noun] [noun]?";
-        String expectedOutput2 = " Greetings, [noun]. I ran to the [noun] today and [verbPast] some gum. Do you [verb] a baloney [noun]?";
-        String expectedOutput3 = " Greetings, person. I [verbPast] to the gym today and [verbPast] some gum. Do you want a [noun] sandwich?";
-        String expectedOutput4 = " Greetings, person. I ran to the [noun] today and chewed some gum. Do you [verb] a baloney sandwich?";
-
-        // Large input should preserve original text
-        String expectedOutput5 = " Greetings, person. I ran to the gym today and chewed some gum. Do you want a baloney sandwich?";
-
+        String expectedOutput1 = "[pluralNoun], [noun]. I [verbPast] to the [noun] [noun] and [verbPast] some [noun]. Do you [verb] a [noun] [noun]?";
+        String expectedOutput2 = "Greetings, [noun]. I ran to the [noun] today and [verbPast] some gum. Do you [verb] a baloney [noun]?";
+        String expectedOutput3 = "Greetings, person. I [verbPast] to the gym today and [verbPast] some gum. Do you want a [noun] sandwich?";
+        String expectedOutput4 = "Greetings, person. I ran to the [noun] today and chewed some gum. Do you [verb] a baloney sandwich?";
+        String expectedOutput5 = "Greetings, person. I ran to the gym today and chewed some gum. Do you want a baloney sandwich?";
+        String expectedOutput6 = "[pluralNoun], [noun]. I [verbPast] to the [noun] [noun] and [verbPast] some [noun]. Do you [verb] a [noun] [noun]?";
 
         // Create temp directory and file to store text to be madlibified
         Path testTextFile = tempDir.resolve("outText.txt");
@@ -33,7 +31,9 @@ public class MadlibifierTest {
         Path outputFile3 = tempDir.resolve("test3.txt");
         Path outputFile4 = tempDir.resolve("test4.txt");
         Path outputFile5 = tempDir.resolve("test5.txt");
+        Path outputFile6 = tempDir.resolve("test6.txt");
 
+        // Text contained in new document for comparison
         String textForFile = "Greetings, person. I ran to the gym today and chewed some gum. Do you want a baloney sandwich?";
         Files.writeString(testTextFile, textForFile);
 
@@ -53,8 +53,13 @@ public class MadlibifierTest {
         Madlibifier.removeMadlibifiables(annotatedText, outputFile4.toString(), 4);
         String madlibifiedText4 = Files.readString(outputFile4);
 
+        // Large input (above file's word count) should preserve original text
         Madlibifier.removeMadlibifiables(annotatedText, outputFile5.toString(), 99);
         String madlibifiedText5 = Files.readString(outputFile5);
+
+        // Skipper value below 1 should default to 1 (madlibify every word)
+        Madlibifier.removeMadlibifiables(annotatedText, outputFile6.toString(), -10);
+        String madlibifiedText6 = Files.readString(outputFile6);
 
         assertEquals(expectedOutput1, madlibifiedText1);
         assertNotEquals("Greetings, person. I ran to the gym today and chewed some gum. Do you want a baloney sandwich?", madlibifiedText1);
@@ -71,6 +76,9 @@ public class MadlibifierTest {
 
         assertEquals(expectedOutput5, madlibifiedText5);
         System.out.println("Big skip passed");
+
+        assertEquals(expectedOutput6, madlibifiedText6);
+        System.out.println("Skip default passed");
 
     }
 }

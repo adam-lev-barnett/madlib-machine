@@ -38,6 +38,10 @@ public abstract class Madlibifier {
         wordsToSkip.add("has");
         wordsToSkip.add("had");
         wordsToSkip.add("shall");
+        wordsToSkip.add("is");
+        wordsToSkip.add("was");
+        wordsToSkip.add("isn't");
+
     }
 
     // Removes the skipper-th word with a part of speech in the posBlocks hashset
@@ -60,6 +64,10 @@ public abstract class Madlibifier {
             ArrayList<String> posList = new ArrayList<>();
 
             for (CoreLabel token : text.getDocument().tokens()) {
+
+                // First word won't have a space added before it
+                boolean isFirstWord = text.getDocument().tokens().indexOf(token) == 0;
+
                 // Retrieve the [part of speech block] to replace the word in the new madlib
                 // pos Map in PosRemover returns null if part of speech can't be madlibified
                 replacementBlock = PosRemover.getPosReplacementBlock(token.get(CoreAnnotations.PartOfSpeechAnnotation.class));
@@ -68,19 +76,22 @@ public abstract class Madlibifier {
                 if (wordsToSkip.contains(token.word())) replacementBlock = null;
 
                 if (i < skipper) {
-                    justWriteWord(token, writer);
+                    justWriteWord(token, writer, isFirstWord);
                     // i only increments when the current word is madlibifiable
                     if (replacementBlock != null) i++;
                 }
                 // the skipper count resets after a word is madlibified
                 else {
                     if (replacementBlock != null) {
-                        writer.write(" [" + replacementBlock + "]");
+                        if (isFirstWord) {
+                            writer.write("[" + replacementBlock + "]");
+                        }
+                        else writer.write(" [" + replacementBlock + "]");
                         posList.add(replacementBlock);
                         i = 1;
                     }
                     else {
-                        justWriteWord(token, writer);
+                        justWriteWord(token, writer, isFirstWord);
                     }
                 }
             }
@@ -96,10 +107,12 @@ public abstract class Madlibifier {
     // Nothing is added to the punctuation character
 
     /** Helper method for removeMadlibifiable() that writes each word to a file with a preceding space*/
-    private static void justWriteWord(CoreLabel token, BufferedWriter writer) throws IOException {
-        if (token.word().matches("\\p{Punct}")) {
+    private static void justWriteWord(CoreLabel token, BufferedWriter writer, boolean isFirstWord) throws IOException {
+
+        if (token.word().matches("\\p{Punct}") || isFirstWord) {
             writer.write(token.get(CoreAnnotations.TextAnnotation.class));
         }
+
         else writer.write(" " + token.get(CoreAnnotations.TextAnnotation.class));
     }
 

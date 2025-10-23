@@ -36,7 +36,7 @@ public enum UserController {
 
         File originalText = getFile(filename);
 
-        if (originalText == null) {
+        if (!originalText.exists()) {
             throw new TextNotProcessedException("txt file could not be parsed. You blew it. Exiting program.");
         }
 
