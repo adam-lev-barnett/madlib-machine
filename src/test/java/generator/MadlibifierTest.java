@@ -4,12 +4,15 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 import tagger.TextAnnotater;
+import utility.exceptions.InvalidPartOfSpeechException;
 import utility.exceptions.TextNotProcessedException;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Queue;
 
 public class MadlibifierTest {
 
@@ -81,10 +84,8 @@ public class MadlibifierTest {
         // list should be empty because all madlibifiable words are skipped
         ArrayList<String> expectedList5 = new ArrayList<>();
 
-
         // Remove every madlibifiable word from textForFile, and continue skipping 1 more per test
         ArrayList<String> posList1 = Madlibifier.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);
-
         String madlibifiedText1 = Files.readString(outputFile1);
 
         ArrayList<String> posList2 = Madlibifier.removeMadlibifiables(annotatedText, outputFile2.toString(), 2);
@@ -128,9 +129,82 @@ public class MadlibifierTest {
         assertThrows(TextNotProcessedException.class,  () -> Madlibifier.removeMadlibifiables(null, outputFile6.toString(), 3));
         assertThrows(IOException.class,  () -> Madlibifier.removeMadlibifiables(annotatedText, null, 3));
 
-        // Testing correct return values
+    }
 
+    // Helper method for removeMadlibifiables to handle spaces
+    // First word and punctuation should not have spaces before or after them
+    @Test
+    void testJustWriteWord() throws IOException {
 
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
+            Madlibifier.justWriteWord(annotatedText.getDocument().tokens().get(0), writer, true);
+        }
+        String firstWordTest1 = Files.readString(outputFile1);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
+            Madlibifier.justWriteWord(annotatedText.getDocument().tokens().get(0), writer, false);
+            Madlibifier.justWriteWord(annotatedText.getDocument().tokens().get(1), writer, false);
+        }
+
+        String firstWordTest2 = Files.readString(outputFile1);
+
+        // First word in document should not have a leading space
+        assertEquals("Greetings", firstWordTest1);
+
+        // Second word should have a leading space
+        assertEquals(" Greetings,", firstWordTest2);
+    }
+
+    @Test
+    void testReplaceWordWithBlock() throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
+            Madlibifier.replaceWordWithBlock(true, writer, "noun");
+        } catch (InvalidPartOfSpeechException e) {
+        }
+        String firstWordTest1 = Files.readString(outputFile1);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
+            Madlibifier.replaceWordWithBlock(false, writer, "noun");
+        } catch (InvalidPartOfSpeechException e) {
+        }
+        String firstWordTest2 = Files.readString(outputFile1);
+
+        // Replaces word with "[YouMessedUp]" if the part of speech passed as a string is not a legitimate part of speech
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
+            Madlibifier.replaceWordWithBlock(false, writer, "not a real part of speech");
+        } catch (InvalidPartOfSpeechException e) {
+        }
+        String firstWordTest3 = Files.readString(outputFile1);
+
+        assertEquals("[noun]", firstWordTest1);
+        assertEquals(" [noun]", firstWordTest2);
+        assertEquals("[YouMessedUp]", firstWordTest3);
+    }
+
+    @Test
+    void testFillInMadlib() throws TextNotProcessedException, IOException {
+
+        // Reference madlib
+        // "[pluralNoun], [noun]. I [verbPast] to the [noun] [noun] and [verbPast] some [noun]. Do you [verb] a [noun] [noun]?";
+        String test1 = "Potatoes, cowboy. I tested to the space moon and folded some napkins. Do you carry a banana cabbage?";
+
+        // Remove all madlibifiable words from txt file
+        Madlibifier.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);
+
+        Queue<String> replacementWords = new ArrayDeque<>();
+        replacementWords.add("Potatoes");
+        replacementWords.add("cowboy");
+        replacementWords.add("tested");
+        replacementWords.add("space");
+        replacementWords.add("moon");
+        replacementWords.add("folded");
+        replacementWords.add("napkins");
+        replacementWords.add("carry");
+        replacementWords.add("banana");
+        replacementWords.add("cabbage");
+
+        Madlibifier.fillInMadlib(outputFile1.toString(), outputFile2.toString(), replacementWords);
+        assertEquals(test1, Files.readString(outputFile2));
 
     }
 }

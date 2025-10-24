@@ -3,6 +3,7 @@ package generator;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import tagger.TextAnnotater;
+import utility.exceptions.InvalidPartOfSpeechException;
 import utility.exceptions.TextNotProcessedException;
 
 import java.io.*;
@@ -137,7 +138,12 @@ public abstract class Madlibifier {
         }
     }
 
-    static void replaceWordWithBlock(boolean isFirstWord, BufferedWriter writer, String replacementBlock) throws IOException {
+    // justWriteWord but handles Strings instead of tokens to print the part of speech returned by the part of speech map inside square brackets
+    static void replaceWordWithBlock(boolean isFirstWord, BufferedWriter writer, String replacementBlock) throws IOException, InvalidPartOfSpeechException {
+        if (!posReplacements.containsValue(replacementBlock)) {
+            writer.write("[YouMessedUp]");
+            throw new InvalidPartOfSpeechException("Passed invalid part of speech. Replacing word with [YouMessedUp]");
+        }
         if (isFirstWord) {
             writer.write("[" + replacementBlock + "]");
         }
@@ -166,17 +172,30 @@ public abstract class Madlibifier {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] words = line.split("\\s+");
-
                 for (String word : words) {
+                    boolean lastWord = false;
                     if (word == null) continue;
                     // If the replacement word queue is empty, continue simply copying words into the file
-                    String strippedWord = word.replaceAll("[^a-zA-Z\\[\\].,]", "");
+                    if (word.equals(words[words.length - 1])) lastWord = true;
+                    String strippedWord = word.replaceAll("[^a-zA-Z\\[\\]]", "");
                     if (posBlocks.contains(strippedWord) && replacementWords.peek() != null) {
-                        writer.write(replacementWords.poll() + " ");
+                        // Convert last character to string to check against regex
+                        String lastChar = Character.toString(word.charAt(word.length() - 1));
+
+                        // Keep punctuation to append to replacement word if the word ends in punctuation
+                        if (lastChar.matches("[.,\"!?]")) {
+
+                            // Don't add a space to the end if it's the last word on a line - mostly matters for testing
+                            if (lastWord) writer.write(replacementWords.poll() + lastChar);
+                            else writer.write(replacementWords.poll() + lastChar + " ");
+
+                        }
+                        else {
+                            writer.write(replacementWords.poll() + " ");
+                        }
                     }
                     else writer.write(word + " ");
                 }
-                writer.newLine();
             }
             System.out.println("Madlib successfully populated and saved to the src folder!");
         }
