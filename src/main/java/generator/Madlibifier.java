@@ -10,11 +10,30 @@ import java.util.*;
 
 public abstract class Madlibifier {
 
+    // Converts CoreNLP tags with clearer part of speech identifiers
+    private static final HashMap<String, String> posReplacements = new HashMap<>();
+
     /** Identifies where in the text file the words should be replaced with the user's new words */
     private static final Set<String> posBlocks = new HashSet<>();
     private static final Set<String> wordsToSkip = new HashSet<>();
 
+    // Initialize collections for part of speech identification, removal, and replacement
+    // Filters for parts of speech and words that should never be removed
     static {
+        // Comment out parts of speech you don't want to skip
+        //! When commenting out pos, be sure to comment out the same part of speech in posBlocks below
+        posReplacements.put("NN", "noun");
+        posReplacements.put("NNS", "pluralNoun");
+        posReplacements.put("VB", "verb");
+        posReplacements.put("VBD", "verbPast");
+        // posReplacements.put("VBG", "gerund");
+        posReplacements.put("VBZ", "verbEndingInS");
+        posReplacements.put("JJ", "adjective");
+        // posReplacements.put("JJR", "adjective ending in \"er\"");
+        posReplacements.put("RB", "adverb");
+        // posReplacements.put("RBS", "adverb ending in \"est\"");
+        posReplacements.put("UH", "interjection");
+
         // The parts os speech to blank out and their associated text blocks; when commented out, madlibifier doesn't consider it a madlibifiable word
         posBlocks.add("[noun]");
         posBlocks.add("[pluralNoun]");
@@ -28,7 +47,10 @@ public abstract class Madlibifier {
         //posBlocks.add("[adverb ending in \"est\"]");
         posBlocks.add("[interjection]");
 
+        // List of words to avoid that have the accepted parts of speech
         wordsToSkip.add("be");
+        wordsToSkip.add("being");
+        wordsToSkip.add("am");
         wordsToSkip.add("not");
         wordsToSkip.add("using");
         wordsToSkip.add("uses");
@@ -40,8 +62,23 @@ public abstract class Madlibifier {
         wordsToSkip.add("shall");
         wordsToSkip.add("is");
         wordsToSkip.add("was");
+        wordsToSkip.add("were");
         wordsToSkip.add("isn't");
-
+        wordsToSkip.add("behalf");
+        wordsToSkip.add("can");
+        wordsToSkip.add("cannot");
+        wordsToSkip.add("can't");
+        wordsToSkip.add("will");
+        wordsToSkip.add("won't");
+        wordsToSkip.add("would");
+        wordsToSkip.add("must");
+        wordsToSkip.add("might");
+        wordsToSkip.add("may");
+        wordsToSkip.add("should");
+        wordsToSkip.add("could");
+        wordsToSkip.add("does");
+        wordsToSkip.add("did");
+        wordsToSkip.add("do");
     }
 
     // Removes the skipper-th word with a part of speech in the posBlocks hashset
@@ -69,8 +106,8 @@ public abstract class Madlibifier {
                 boolean isFirstWord = text.getDocument().tokens().indexOf(token) == 0;
 
                 // Retrieve the [part of speech block] to replace the word in the new madlib
-                // pos Map in PosRemover returns null if part of speech can't be madlibified
-                replacementBlock = PosRemover.getPosReplacementBlock(token.get(CoreAnnotations.PartOfSpeechAnnotation.class));
+                // Map above returns null if part of speech can't be madlibified
+                replacementBlock = posReplacements.get((token.get(CoreAnnotations.PartOfSpeechAnnotation.class)));
 
                 // disregard any words in wordsToSkip by resetting the block to null
                 if (wordsToSkip.contains(token.word())) replacementBlock = null;
@@ -121,7 +158,7 @@ public abstract class Madlibifier {
     }
 
     /** Takes madlibified madlib (txt file with words replaced by [part of speech] blocks) and fills in with replacement word Queue*/
-    public static void fillInMadlib(String inFilepath, String outFilepath, Queue<String> replacementWords) throws Exception {
+    public static void fillInMadlib(String inFilepath, String outFilepath, Queue<String> replacementWords) throws IOException, TextNotProcessedException {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inFilepath));
             BufferedWriter writer = new BufferedWriter(new FileWriter(outFilepath))) {
@@ -133,7 +170,7 @@ public abstract class Madlibifier {
                 for (String word : words) {
                     if (word == null) continue;
                     // If the replacement word queue is empty, continue simply copying words into the file
-                    String strippedWord = word.replaceAll("[^a-zA-Z\\[\\]]", "");
+                    String strippedWord = word.replaceAll("[^a-zA-Z\\[\\].,]", "");
                     if (posBlocks.contains(strippedWord) && replacementWords.peek() != null) {
                         writer.write(replacementWords.poll() + " ");
                     }
@@ -144,8 +181,8 @@ public abstract class Madlibifier {
             System.out.println("Madlib successfully populated and saved to the src folder!");
         }
 
-        catch(Exception e) {
-            throw new Exception("nope.");
+        catch(IOException e) {
+            throw new IOException("Could not fill in madlib because input or output path is invalid.");
         }
     }
 
