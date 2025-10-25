@@ -1,13 +1,36 @@
-package generator;
+package madlibgeneration;
 
+import userinterface.CLI;
+import utility.exceptions.NullPOSListException;
 import utility.exceptions.TextNotProcessedException;
+import utility.filehandling.FileHandler;
 
 import java.io.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
-public abstract class WordReplacer {
+public abstract class MadlibFiller {
+
+    // Prompts user for words for each needed part of speech; returns list used to repopulate madlib with new words
+    public static Queue<String> getReplacementWords(List<String> posList) throws NullPOSListException {
+
+        // Convert null list to empty ArrayList
+        if (posList == null) {
+            throw new NullPOSListException("No POS list found. Blanked words will not be replaced, and program will exit");
+        }
+        Queue<String> wordList = new ArrayDeque<>();
+        System.out.println("Please enter a word for each of the following parts of speech:");
+        for (String pos : posList) {
+            System.out.println(pos + ": ");
+            if (pos != null) wordList.add(CLI.getScanner().nextLine());
+        }
+        return wordList;
+    }
+
     /** Takes madlibified madlib (txt file with words replaced by [part of speech] blocks) and fills in with replacement word Queue*/
-    public static void fillInMadlib(String inFilepath, String outFilepath, Queue<String> replacementWords) throws IOException, TextNotProcessedException {
+    public static void fillInMadlib(String inFilepath, String outFilepath, Queue<String> replacementWords) throws IOException {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inFilepath));
             BufferedWriter writer = new BufferedWriter(new FileWriter(outFilepath))) {
@@ -25,7 +48,7 @@ public abstract class WordReplacer {
                     if (word.equals(words[words.length - 1])) lastWord = true;
 
                     // Clear any punctuation in the word to check if it's a legitimate part of speech block in Madlibifier posMap
-                    String strippedWord = word.replaceAll("[^a-zA-Z\\[\\]]", "");
+                    String strippedWord = word.replaceAll("[^a-zA-Z]", "");
 
                     // Check word syntax and replace based on conditionals, or else write the word as written (it's not madlibifiable)
                     if (Madlibifier.getPosMap().containsValue(strippedWord) && replacementWords.peek() != null) {
@@ -42,6 +65,7 @@ public abstract class WordReplacer {
         }
     }
 
+    // Helper method for parsing and formatting words in the blanked madlib based on whether a word should be replaced or not
     private static void replaceWord(Queue<String> replacementWords, String lastChar, boolean lastWord, BufferedWriter writer) throws IOException {
         // Check last character to check against regex
         if (lastChar.matches("[.,\"!?]")) {
@@ -54,5 +78,6 @@ public abstract class WordReplacer {
             writer.write(replacementWords.poll() + " ");
         }
     }
+
 
 }

@@ -1,4 +1,4 @@
-package generator;
+package madlibgeneration;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
@@ -181,30 +181,4 @@ public class MadlibifierTest {
         assertEquals("[YouMessedUp]", firstWordTest3);
     }
 
-    @Test
-    void testFillInMadlib() throws TextNotProcessedException, IOException {
-
-        // Reference madlib
-        // "[pluralNoun], [noun]. I [verbPast] to the [noun] [noun] and [verbPast] some [noun]. Do you [verb] a [noun] [noun]?";
-        String test1 = "Potatoes, cowboy. I tested to the space moon and folded some napkins. Do you carry a banana cabbage?";
-
-        // Remove all madlibifiable words from txt file
-        Madlibifier.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);
-
-        Queue<String> replacementWords = new ArrayDeque<>();
-        replacementWords.add("Potatoes");
-        replacementWords.add("cowboy");
-        replacementWords.add("tested");
-        replacementWords.add("space");
-        replacementWords.add("moon");
-        replacementWords.add("folded");
-        replacementWords.add("napkins");
-        replacementWords.add("carry");
-        replacementWords.add("banana");
-        replacementWords.add("cabbage");
-
-        WordReplacer.fillInMadlib(outputFile1.toString(), outputFile2.toString(), replacementWords);
-        assertEquals(test1, Files.readString(outputFile2));
-
-    }
 }

@@ -1,10 +1,12 @@
 package userinterface;
 
-import generator.Madlibifier;
-import generator.WordReplacer;
+import madlibgeneration.Madlibifier;
+import madlibgeneration.MadlibFiller;
+import org.jetbrains.annotations.NotNull;
 import tagger.TextAnnotater;
 import utility.exceptions.NullPOSListException;
 import utility.exceptions.TextNotProcessedException;
+import utility.filehandling.FileHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,39 +23,30 @@ public enum CLI {
     private static final Pattern DIGITS = Pattern.compile("[0-9]+");
 
 
-    public static void initiateMadlibCreation() throws IOException, TextNotProcessedException, NullPOSListException {
+    public static void initiateMadlibCreation() throws Exception {
         System.out.println("Welcome to the Madlib Machine!");
         System.out.println();
 
         System.out.println("Please enter filepath of .txt file or type \"quit\" to quit: ");
         String filename = SCANNER.nextLine();
 
-        File originalText = getFile(filename);
+        File originalText = FileHandler.getSourceTxtFile(filename);
 
         if (originalText == null || !originalText.exists()) {
             throw new TextNotProcessedException("txt file could not be parsed. You blew it. Exiting program.");
         }
 
-        System.out.println("What would you like to save your new madlib as?");
-        String newFilename = SCANNER.nextLine() + ".txt";
+        System.out.println("What would you like to save your blanked madlib as?");
+        String blankMadlibFilename = SCANNER.nextLine() + ".txt";
 
-        System.out.println("How many madlibifiable words would you like to ignore? The lower the number, the more words you'll need to replace");
-
-        // while parsing the desired text, skipMadlibifiables represents how many madlibifiable words will be skipped before a madlibifiable word is blanked
-        // skipMadlibifiables is limited to 9; 0 results in original text
-        String skipMadlibifiables = SCANNER.nextLine();
-        Matcher matcher = DIGITS.matcher(skipMadlibifiables);
-
-        while (!matcher.matches()) {
-            System.out.println("Please enter a number 0 through 9");
-            skipMadlibifiables = SCANNER.nextLine();
-            matcher = DIGITS.matcher(skipMadlibifiables);
-        }
+        // prompts user for how many madlibifiable words will be skipped before a madlibifiable word is blanked
+        String skipMadlibifiables = getMadlibifiableSkipper();
 
         // identifies parts of speech for each word of the given file, replaces the nth madlibifiable word with associated part of speech block, returns list of removed parts of speech
         // to prompt user to fill out replacement words in order of removal
-        ArrayList<String> posList = Madlibifier.removeMadlibifiables(new TextAnnotater(originalText), newFilename, Integer.parseInt(skipMadlibifiables));
+        ArrayList<String> posList = Madlibifier.removeMadlibifiables(new TextAnnotater(originalText), blankMadlibFilename, Integer.parseInt(skipMadlibifiables));
         System.out.println();
+
         System.out.println("Would you like to fill in your new madlib? (yes/no) ");
         String response = SCANNER.nextLine();
 
@@ -67,58 +60,40 @@ public enum CLI {
             return;
         }
 
-        // If the part of speech list collected from removeMadlibifiables returns null, fillInMadlib fails and closes the program as if the user responded "no" to filling in the madlib
-        if (replaceWords(posList, newFilename)) {
+        System.out.println("You will now be prompted to fill in a word for each provided part of speech.");
+        System.out.println();
+        Queue<String> userWords = MadlibFiller.getReplacementWords(posList);
+
+        System.out.println("What would you like to save your completed madlib as?");
+        String completedMadlibFilename = CLI.getScanner().nextLine() + ".txt";
+
+        // Replaces pos text blocks with user's replacement words
+        try {
+            MadlibFiller.fillInMadlib(blankMadlibFilename, completedMadlibFilename, userWords);
             System.out.println("Congratulations! You did it! Whether you created a new spin on a short story or perverted your favorite bible chapter, thank you for having fun.");
+        } catch (Exception e) {
+            System.err.println("Madlib word replacement failed. You're stuck with the unfilled madlib until you try again");
         }
-        else System.err.println("Madlib word replacement failed. You're stuck with the unfilled madlib until you try again");
+
         System.out.println("Goodbye.");
     }
 
-    private static File getFile(String filename) {
-        File originalText;
-        while (true) {
-            if (filename.equalsIgnoreCase("quit")) return null;
-            try {
-                originalText = new File(filename);
-                break;
-            } catch (Exception e) {
-                System.err.println("Invalid filepath.");
-                System.out.println("Please enter filepath of .txt file or type \"quit\" to quit: ");
-                filename = SCANNER.nextLine();
-            }
-        }
-        return originalText;
-    }
+    private static String getMadlibifiableSkipper() {
+        // skipMadlibifiables is limited to 9; 0 results in original text
+        System.out.println("How many madlibifiable words would you like to ignore? The lower the number, the more words you'll need to replace");
+        String skipMadlibifiables = SCANNER.nextLine();
+        Matcher matcher = DIGITS.matcher(skipMadlibifiables);
 
-    // Attempts and confirms word replacement. Calls method to save file if successful
-    private static boolean replaceWords(ArrayList<String> posList, String newFilename) throws NullPOSListException {
-        if (posList == null) throw new NullPOSListException("Could not locate any removed parts of speech; list was null.");
-        Queue<String> userWords;
-        System.out.println("You will now be prompted to fill in a word for each provided part of speech.");
-        System.out.println();
-        try {
-            userWords = PosPrompter.fillInMadlib(posList);
-            saveFilledInMadlib(newFilename, userWords);
-            return true;
-        } catch (Exception e) {
-            System.out.println("Blanked madlib still saved. Thank you for madlibbing! Goodbye.");
-            return false;
+        while (!matcher.matches()) {
+            System.out.println("Please enter a number 0 through 9");
+            skipMadlibifiables = SCANNER.nextLine();
+            matcher = DIGITS.matcher(skipMadlibifiables);
         }
-    }
-
-    // initiateMadlibCreation passes the blank madlib filename and the replacement words
-    private static void saveFilledInMadlib(String newFilename, Queue<String> userWords) throws Exception {
-        System.out.println("What would you like to save your completed madlib as?");
-        String completeMadlibFilename = SCANNER.nextLine() + ".txt";
-        try {
-            WordReplacer.fillInMadlib(newFilename, completeMadlibFilename, userWords);
-        } catch (Exception e) {
-            throw new Exception("Couldn't populate madlib");
-        }
+        return skipMadlibifiables;
     }
 
     public static Scanner getScanner() {
         return SCANNER;
     }
+
 }
