@@ -9,10 +9,11 @@ import utility.exceptions.TextNotProcessedException;
 import java.io.*;
 import java.util.*;
 
+/* Converts text into Madlibs by removing words and replacing them with text blocks containing the associated part of speech**/
 public abstract class Madlibifier {
 
     // Converts CoreNLP tags with clearer part of speech identifiers
-    private static final HashMap<String, String> posReplacements = new HashMap<>();
+    private static final HashMap<String, String> posMap = new HashMap<>();
 
     /** Identifies where in the text file the words should be replaced with the user's new words */
     private static final Set<String> posBlocks = new HashSet<>();
@@ -23,30 +24,17 @@ public abstract class Madlibifier {
     static {
         // Comment out parts of speech you don't want to skip
         //! When commenting out pos, be sure to comment out the same part of speech in posBlocks below
-        posReplacements.put("NN", "noun");
-        posReplacements.put("NNS", "pluralNoun");
-        posReplacements.put("VB", "verb");
-        posReplacements.put("VBD", "verbPast");
+        posMap.put("NN", "noun");
+        posMap.put("NNS", "pluralNoun");
+        posMap.put("VB", "verb");
+        posMap.put("VBD", "verbPast");
         // posReplacements.put("VBG", "gerund");
-        posReplacements.put("VBZ", "verbEndingInS");
-        posReplacements.put("JJ", "adjective");
+        posMap.put("VBZ", "verbEndingInS");
+        posMap.put("JJ", "adjective");
         // posReplacements.put("JJR", "adjective ending in \"er\"");
-        posReplacements.put("RB", "adverb");
+        posMap.put("RB", "adverb");
         // posReplacements.put("RBS", "adverb ending in \"est\"");
-        posReplacements.put("UH", "interjection");
-
-        // The parts os speech to blank out and their associated text blocks; when commented out, madlibifier doesn't consider it a madlibifiable word
-        posBlocks.add("[noun]");
-        posBlocks.add("[pluralNoun]");
-        posBlocks.add("[verb]");
-        posBlocks.add("[verbPast]");
-        // posBlocks.add("[gerund]");
-        posBlocks.add("[verbEndingInS]");
-        posBlocks.add("[adjective]");
-        //posBlocks.add("[adjective ending in \"er\"]");
-        posBlocks.add("[adverb]");
-        //posBlocks.add("[adverb ending in \"est\"]");
-        posBlocks.add("[interjection]");
+        posMap.put("UH", "interjection");
 
         // List of words to avoid that have the accepted parts of speech
         wordsToSkip.add("be");
@@ -108,7 +96,7 @@ public abstract class Madlibifier {
 
                 // Retrieve the [part of speech block] to replace the word in the new madlib
                 // Map above returns null if part of speech can't be madlibified
-                replacementBlock = posReplacements.get((token.get(CoreAnnotations.PartOfSpeechAnnotation.class)));
+                replacementBlock = posMap.get((token.get(CoreAnnotations.PartOfSpeechAnnotation.class)));
 
                 // disregard any words in wordsToSkip by resetting the block to null
                 if (wordsToSkip.contains(token.word())) replacementBlock = null;
@@ -140,7 +128,7 @@ public abstract class Madlibifier {
 
     // justWriteWord but handles Strings instead of tokens to print the part of speech returned by the part of speech map inside square brackets
     static void replaceWordWithBlock(boolean isFirstWord, BufferedWriter writer, String replacementBlock) throws IOException, InvalidPartOfSpeechException {
-        if (!posReplacements.containsValue(replacementBlock)) {
+        if (!posMap.containsValue(replacementBlock)) {
             writer.write("[YouMessedUp]");
             throw new InvalidPartOfSpeechException("Passed invalid part of speech. Replacing word with [YouMessedUp]");
         }
@@ -159,50 +147,11 @@ public abstract class Madlibifier {
         if (token.word().matches("\\p{Punct}") || isFirstWord) {
             writer.write(token.get(CoreAnnotations.TextAnnotation.class));
         }
-
         else writer.write(" " + token.get(CoreAnnotations.TextAnnotation.class));
     }
 
-    /** Takes madlibified madlib (txt file with words replaced by [part of speech] blocks) and fills in with replacement word Queue*/
-    public static void fillInMadlib(String inFilepath, String outFilepath, Queue<String> replacementWords) throws IOException, TextNotProcessedException {
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(inFilepath));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(outFilepath))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] words = line.split("\\s+");
-                for (String word : words) {
-                    boolean lastWord = false;
-                    if (word == null) continue;
-                    // If the replacement word queue is empty, continue simply copying words into the file
-                    if (word.equals(words[words.length - 1])) lastWord = true;
-                    String strippedWord = word.replaceAll("[^a-zA-Z\\[\\]]", "");
-                    if (posBlocks.contains(strippedWord) && replacementWords.peek() != null) {
-                        // Convert last character to string to check against regex
-                        String lastChar = Character.toString(word.charAt(word.length() - 1));
-
-                        // Keep punctuation to append to replacement word if the word ends in punctuation
-                        if (lastChar.matches("[.,\"!?]")) {
-
-                            // Don't add a space to the end if it's the last word on a line - mostly matters for testing
-                            if (lastWord) writer.write(replacementWords.poll() + lastChar);
-                            else writer.write(replacementWords.poll() + lastChar + " ");
-
-                        }
-                        else {
-                            writer.write(replacementWords.poll() + " ");
-                        }
-                    }
-                    else writer.write(word + " ");
-                }
-            }
-            System.out.println("Madlib successfully populated and saved to the src folder!");
-        }
-
-        catch(IOException e) {
-            throw new IOException("Could not fill in madlib because input or output path is invalid.");
-        }
+    public static Map<String, String> getPosMap() {
+        return Collections.unmodifiableMap(posMap);
     }
 
 

@@ -1,31 +1,25 @@
 package userinterface;
 
 import generator.Madlibifier;
-import org.jetbrains.annotations.Nullable;
+import generator.WordReplacer;
 import tagger.TextAnnotater;
 import utility.exceptions.NullPOSListException;
 import utility.exceptions.TextNotProcessedException;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public enum UserController {
+public enum CLI {
     INSTANCE;
 
     private static final Scanner SCANNER = new Scanner(System.in);
-
     private static final Pattern DIGITS = Pattern.compile("[0-9]+");
 
-    // Prompts user to enter missing parts of speech to populate madlib
-    public void promptPOS() {
-
-    }
 
     public static void initiateMadlibCreation() throws IOException, TextNotProcessedException, NullPOSListException {
         System.out.println("Welcome to the Madlib Machine!");
@@ -36,7 +30,7 @@ public enum UserController {
 
         File originalText = getFile(filename);
 
-        if (!originalText.exists()) {
+        if (originalText == null || !originalText.exists()) {
             throw new TextNotProcessedException("txt file could not be parsed. You blew it. Exiting program.");
         }
 
@@ -73,17 +67,11 @@ public enum UserController {
             return;
         }
 
-        System.out.println("You will now be prompted to fill in a word for each provided part of speech.");
-        System.out.println();
-
         // If the part of speech list collected from removeMadlibifiables returns null, fillInMadlib fails and closes the program as if the user responded "no" to filling in the madlib
-        if (!replaceWords(posList, newFilename)) {
-            System.err.println("Madlib word replacement failed. You're stuck with the unfilled madlib until you try again");
-            System.out.println("Goodbye.");
-            return;
+        if (replaceWords(posList, newFilename)) {
+            System.out.println("Congratulations! You did it! Whether you created a new spin on a short story or perverted your favorite bible chapter, thank you for having fun.");
         }
-
-        System.out.println("Congratulations! You did it! Whether you created a new spin on a short story or perverted your favorite bible chapter, thank you for having fun.");
+        else System.err.println("Madlib word replacement failed. You're stuck with the unfilled madlib until you try again");
         System.out.println("Goodbye.");
     }
 
@@ -107,6 +95,8 @@ public enum UserController {
     private static boolean replaceWords(ArrayList<String> posList, String newFilename) throws NullPOSListException {
         if (posList == null) throw new NullPOSListException("Could not locate any removed parts of speech; list was null.");
         Queue<String> userWords;
+        System.out.println("You will now be prompted to fill in a word for each provided part of speech.");
+        System.out.println();
         try {
             userWords = PosPrompter.fillInMadlib(posList);
             saveFilledInMadlib(newFilename, userWords);
@@ -122,7 +112,7 @@ public enum UserController {
         System.out.println("What would you like to save your completed madlib as?");
         String completeMadlibFilename = SCANNER.nextLine() + ".txt";
         try {
-            Madlibifier.fillInMadlib(newFilename, completeMadlibFilename, userWords);
+            WordReplacer.fillInMadlib(newFilename, completeMadlibFilename, userWords);
         } catch (Exception e) {
             throw new Exception("Couldn't populate madlib");
         }

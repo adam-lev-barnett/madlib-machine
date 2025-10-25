@@ -6,7 +6,7 @@ import java.util.*;
 
 public abstract class PosPrompter {
 
-    private static final Scanner scanner = UserController.getScanner();
+    private static final Scanner scanner = CLI.getScanner();
 
     // Prompts user for words for each needed part of speech; returns list used to repopulate madlib with new words
     public static Queue<String> fillInMadlib(List<String> posList) throws NullPOSListException {

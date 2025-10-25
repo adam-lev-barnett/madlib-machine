@@ -203,7 +203,7 @@ public class MadlibifierTest {
         replacementWords.add("banana");
         replacementWords.add("cabbage");
 
-        Madlibifier.fillInMadlib(outputFile1.toString(), outputFile2.toString(), replacementWords);
+        WordReplacer.fillInMadlib(outputFile1.toString(), outputFile2.toString(), replacementWords);
         assertEquals(test1, Files.readString(outputFile2));
 
     }
