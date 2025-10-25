@@ -17,7 +17,7 @@ public class TextAnnotater {
     // Constructor creates document object upon instantiation
     public TextAnnotater(String text) {
         this.document = new CoreDocument(text);
-        TextParser.getPipeline().annotate(document);
+        TextParser.getInstance().getPipeline().annotate(document);
     }
 
     // If a file has already been instantiated, constructor reads file and calls resulting String constructor

@@ -16,8 +16,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public enum CLI {
-    INSTANCE;
+public abstract class CLI {
 
     private static final Scanner SCANNER = new Scanner(System.in);
     private static final Pattern DIGITS = Pattern.compile("[0-9]+");

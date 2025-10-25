@@ -2,7 +2,6 @@ package tagger;
 
 import java.util.Properties;
 
-import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ie.util.*;
 import edu.stanford.nlp.pipeline.*;
@@ -22,8 +21,12 @@ public enum TextParser {
         pipeline = new StanfordCoreNLP(props);
     }
 
-    public static StanfordCoreNLP getPipeline() {
+    public StanfordCoreNLP getPipeline() {
         return pipeline;
+    }
+
+    public static TextParser getInstance() {
+        return INSTANCE;
     }
 
 
