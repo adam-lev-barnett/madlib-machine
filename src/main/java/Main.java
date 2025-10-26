@@ -4,8 +4,8 @@ public class Main {
 
 
     public static void main(String[] args) throws Exception {
+
         CLI.initiateMadlibCreation();
-        // System.out.println("Writing file to: " + new File("boop").getAbsolutePath());
 
     }
 }
