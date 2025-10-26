@@ -4,14 +4,12 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 import tagger.TextAnnotater;
-import utility.exceptions.InvalidPartOfSpeechException;
 import utility.exceptions.TextNotProcessedException;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Queue;
 
 public class MadlibFillerTest {
@@ -46,7 +44,7 @@ public class MadlibFillerTest {
         String test1 = "Potatoes, cowboy. I tested to the space moon and folded some napkins. Do you carry a banana cabbage?";
 
         // Remove all madlibifiable words from txt file
-        Madlibifier.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);
+        MadlibCreator.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);
 
         Queue<String> replacementWords = new ArrayDeque<>();
         replacementWords.add("Potatoes");

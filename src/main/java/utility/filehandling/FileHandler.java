@@ -1,12 +1,13 @@
 package utility.filehandling;
 
-import madlibgeneration.MadlibFiller;
-import userinterface.CLI;
-
 import java.io.File;
-import java.util.Queue;
+import java.util.Scanner;
+
 
 public abstract class FileHandler {
+
+    private static final Scanner scanner = new Scanner(System.in);
+
 
     public static File getSourceTxtFile(String filename) {
         File originalText;
@@ -18,7 +19,7 @@ public abstract class FileHandler {
             } catch (Exception e) {
                 System.err.println("Invalid filepath.");
                 System.out.println("Please enter filepath of .txt file or type \"quit\" to quit: ");
-                filename = CLI.getScanner().nextLine();
+                filename = scanner.nextLine();
             }
         }
         return originalText;

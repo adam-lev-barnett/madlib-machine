@@ -10,13 +10,12 @@ import java.io.*;
 import java.util.*;
 
 /* Converts text into Madlibs by removing words and replacing them with text blocks containing the associated part of speech**/
-public abstract class Madlibifier {
+public abstract class MadlibCreator {
 
     // Converts CoreNLP tags with clearer part of speech identifiers
     private static final HashMap<String, String> posMap = new HashMap<>();
 
     /** Identifies where in the text file the words should be replaced with the user's new words */
-    private static final Set<String> posBlocks = new HashSet<>();
     private static final Set<String> wordsToSkip = new HashSet<>();
 
     // Initialize collections for part of speech identification, removal, and replacement

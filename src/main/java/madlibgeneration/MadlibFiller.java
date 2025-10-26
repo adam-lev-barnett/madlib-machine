@@ -1,17 +1,19 @@
 package madlibgeneration;
 
-import userinterface.CLI;
 import utility.exceptions.NullPOSListException;
-import utility.exceptions.TextNotProcessedException;
-import utility.filehandling.FileHandler;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Scanner;
 
 public abstract class MadlibFiller {
+
+    private static final Scanner scanner = new Scanner(System.in);
 
     // Prompts user for words for each needed part of speech; returns list used to repopulate madlib with new words
     public static Queue<String> getReplacementWords(List<String> posList) throws NullPOSListException {
@@ -24,7 +26,7 @@ public abstract class MadlibFiller {
         System.out.println("Please enter a word for each of the following parts of speech:");
         for (String pos : posList) {
             System.out.println(pos + ": ");
-            if (pos != null) wordList.add(CLI.getScanner().nextLine());
+            if (pos != null) wordList.add(scanner.nextLine());
         }
         return wordList;
     }
@@ -47,11 +49,11 @@ public abstract class MadlibFiller {
                     // If the replacement word queue is empty, continue simply copying words into the file
                     if (word.equals(words[words.length - 1])) lastWord = true;
 
-                    // Clear any punctuation in the word to check if it's a legitimate part of speech block in Madlibifier posMap
+                    // Clear any punctuation in the word to check if it's a legitimate part of speech block in MadlibCreator posMap
                     String strippedWord = word.replaceAll("[^a-zA-Z]", "");
 
                     // Check word syntax and replace based on conditionals, or else write the word as written (it's not madlibifiable)
-                    if (Madlibifier.getPosMap().containsValue(strippedWord) && replacementWords.peek() != null) {
+                    if (MadlibCreator.getPosMap().containsValue(strippedWord) && replacementWords.peek() != null) {
                         replaceWord(replacementWords, Character.toString(word.charAt(word.length() - 1)), lastWord, writer);
                     }
 
@@ -64,6 +66,48 @@ public abstract class MadlibFiller {
             throw new IOException("Could not fill in madlib because input or output path is invalid.");
         }
     }
+
+//    public static void fillInWholeMadlib(String inFilepath, String outFilepath, Queue<String> replacementWords) throws IOException {
+//
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFilepath))) {
+//
+//            Path unfilledMadlib = Paths.get(inFilepath);
+//            String unfilledText = Files.readString(unfilledMadlib);
+//
+//            String[] words = unfilledText.split("\\s+");
+//            for (String word : words) {
+//
+//            }
+//
+//
+//            while ((line = reader.readLine()) != null) {
+//                String[] words = line.split("\\s+");
+//                for (String word : words) {
+//
+//                    // lastWord determines if there should be a space after the word. Doesn't necessarily matter except for testing
+//                    boolean lastWord = false;
+//                    if (word == null) continue;
+//
+//                    // If the replacement word queue is empty, continue simply copying words into the file
+//                    if (word.equals(words[words.length - 1])) lastWord = true;
+//
+//                    // Clear any punctuation in the word to check if it's a legitimate part of speech block in MadlibCreator posMap
+//                    String strippedWord = word.replaceAll("[^a-zA-Z]", "");
+//
+//                    // Check word syntax and replace based on conditionals, or else write the word as written (it's not madlibifiable)
+//                    if (MadlibCreator.getPosMap().containsValue(strippedWord) && replacementWords.peek() != null) {
+//                        replaceWord(replacementWords, Character.toString(word.charAt(word.length() - 1)), lastWord, writer);
+//                    }
+//
+//                    else writer.write(word + " ");
+//                }
+//            }
+//            System.out.println("Madlib successfully populated and saved to the src folder!");
+//        }
+//        catch(IOException e) {
+//            throw new IOException("Could not fill in madlib because input or output path is invalid.");
+//        }
+//    }
 
     // Helper method for parsing and formatting words in the blanked madlib based on whether a word should be replaced or not
     private static void replaceWord(Queue<String> replacementWords, String lastChar, boolean lastWord, BufferedWriter writer) throws IOException {

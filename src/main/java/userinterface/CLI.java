@@ -1,15 +1,12 @@
 package userinterface;
 
-import madlibgeneration.Madlibifier;
+import madlibgeneration.MadlibCreator;
 import madlibgeneration.MadlibFiller;
-import org.jetbrains.annotations.NotNull;
 import tagger.TextAnnotater;
-import utility.exceptions.NullPOSListException;
 import utility.exceptions.TextNotProcessedException;
 import utility.filehandling.FileHandler;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -43,7 +40,7 @@ public abstract class CLI {
 
         // identifies parts of speech for each word of the given file, replaces the nth madlibifiable word with associated part of speech block, returns list of removed parts of speech
         // to prompt user to fill out replacement words in order of removal
-        ArrayList<String> posList = Madlibifier.removeMadlibifiables(new TextAnnotater(originalText), blankMadlibFilename, Integer.parseInt(skipMadlibifiables));
+        ArrayList<String> posList = MadlibCreator.removeMadlibifiables(new TextAnnotater(originalText), blankMadlibFilename, Integer.parseInt(skipMadlibifiables));
         System.out.println();
 
         System.out.println("Would you like to fill in your new madlib? (yes/no) ");

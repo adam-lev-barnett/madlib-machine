@@ -10,11 +10,9 @@ import utility.exceptions.TextNotProcessedException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Queue;
 
-public class MadlibifierTest {
+public class MadlibCreatorTest {
 
     @TempDir
     Path tempDir;
@@ -85,24 +83,24 @@ public class MadlibifierTest {
         ArrayList<String> expectedList5 = new ArrayList<>();
 
         // Remove every madlibifiable word from textForFile, and continue skipping 1 more per test
-        ArrayList<String> posList1 = Madlibifier.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);
+        ArrayList<String> posList1 = MadlibCreator.removeMadlibifiables(annotatedText, outputFile1.toString(), 1);
         String madlibifiedText1 = Files.readString(outputFile1);
 
-        ArrayList<String> posList2 = Madlibifier.removeMadlibifiables(annotatedText, outputFile2.toString(), 2);
+        ArrayList<String> posList2 = MadlibCreator.removeMadlibifiables(annotatedText, outputFile2.toString(), 2);
         String madlibifiedText2 = Files.readString(outputFile2);
 
-        ArrayList<String> posList3 = Madlibifier.removeMadlibifiables(annotatedText, outputFile3.toString(), 3);
+        ArrayList<String> posList3 = MadlibCreator.removeMadlibifiables(annotatedText, outputFile3.toString(), 3);
         String madlibifiedText3 = Files.readString(outputFile3);
 
-        ArrayList<String> posList4 = Madlibifier.removeMadlibifiables(annotatedText, outputFile4.toString(), 4);
+        ArrayList<String> posList4 = MadlibCreator.removeMadlibifiables(annotatedText, outputFile4.toString(), 4);
         String madlibifiedText4 = Files.readString(outputFile4);
 
         // Large input (above file's word count) should preserve original text
-        ArrayList<String> posList5 = Madlibifier.removeMadlibifiables(annotatedText, outputFile5.toString(), 99);
+        ArrayList<String> posList5 = MadlibCreator.removeMadlibifiables(annotatedText, outputFile5.toString(), 99);
         String madlibifiedText5 = Files.readString(outputFile5);
 
         // Skipper value below 1 should default to 1 (madlibify every word)
-        ArrayList<String> posList6 = Madlibifier.removeMadlibifiables(annotatedText, outputFile6.toString(), -10);
+        ArrayList<String> posList6 = MadlibCreator.removeMadlibifiables(annotatedText, outputFile6.toString(), -10);
         String madlibifiedText6 = Files.readString(outputFile6);
 
         assertEquals(expectedOutput1, madlibifiedText1);
@@ -126,8 +124,8 @@ public class MadlibifierTest {
         assertEquals(posList6, allPartsOfSpeech);
 
         // Exception testing
-        assertThrows(TextNotProcessedException.class,  () -> Madlibifier.removeMadlibifiables(null, outputFile6.toString(), 3));
-        assertThrows(IOException.class,  () -> Madlibifier.removeMadlibifiables(annotatedText, null, 3));
+        assertThrows(TextNotProcessedException.class,  () -> MadlibCreator.removeMadlibifiables(null, outputFile6.toString(), 3));
+        assertThrows(IOException.class,  () -> MadlibCreator.removeMadlibifiables(annotatedText, null, 3));
 
     }
 
@@ -137,13 +135,13 @@ public class MadlibifierTest {
     void testJustWriteWord() throws IOException {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
-            Madlibifier.justWriteWord(annotatedText.getDocument().tokens().get(0), writer, true);
+            MadlibCreator.justWriteWord(annotatedText.getDocument().tokens().get(0), writer, true);
         }
         String firstWordTest1 = Files.readString(outputFile1);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
-            Madlibifier.justWriteWord(annotatedText.getDocument().tokens().get(0), writer, false);
-            Madlibifier.justWriteWord(annotatedText.getDocument().tokens().get(1), writer, false);
+            MadlibCreator.justWriteWord(annotatedText.getDocument().tokens().get(0), writer, false);
+            MadlibCreator.justWriteWord(annotatedText.getDocument().tokens().get(1), writer, false);
         }
 
         String firstWordTest2 = Files.readString(outputFile1);
@@ -158,20 +156,20 @@ public class MadlibifierTest {
     @Test
     void testReplaceWordWithBlock() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
-            Madlibifier.replaceWordWithBlock(true, writer, "noun");
+            MadlibCreator.replaceWordWithBlock(true, writer, "noun");
         } catch (InvalidPartOfSpeechException e) {
         }
         String firstWordTest1 = Files.readString(outputFile1);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
-            Madlibifier.replaceWordWithBlock(false, writer, "noun");
+            MadlibCreator.replaceWordWithBlock(false, writer, "noun");
         } catch (InvalidPartOfSpeechException e) {
         }
         String firstWordTest2 = Files.readString(outputFile1);
 
         // Replaces word with "[YouMessedUp]" if the part of speech passed as a string is not a legitimate part of speech
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile1.toFile()))) {
-            Madlibifier.replaceWordWithBlock(false, writer, "not a real part of speech");
+            MadlibCreator.replaceWordWithBlock(false, writer, "not a real part of speech");
         } catch (InvalidPartOfSpeechException e) {
         }
         String firstWordTest3 = Files.readString(outputFile1);
