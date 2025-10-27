@@ -2,17 +2,18 @@ package tagger;
 
 import java.util.Properties;
 
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ie.util.*;
 import edu.stanford.nlp.pipeline.*;
-import edu.stanford.nlp.semgraph.*;
-import edu.stanford.nlp.trees.*;
 
-public enum TextParser {
+/** Singleton that determines which properties words should be tagged with. The properties are then passed through a pipeline through which TextAnnotater parses source text to madlibify.
+ * The only properties requested are the words themselves (tokens) and their parts of speech.
+ * @see TextAnnotater
+ * @see madlibgeneration.Madlib*/
+public enum TextAnnotationProperties {
     INSTANCE;
 
     /** Properties for CoreNLP are set to pair each word parsed (separated by white space) only with its part of speech*/
     private final static Properties props = new Properties();
+
     /** Pipeline object is responsible for feeding the text file through the annotator*/
     private final static StanfordCoreNLP pipeline;
 
@@ -25,7 +26,7 @@ public enum TextParser {
         return pipeline;
     }
 
-    public static TextParser getInstance() {
+    public static TextAnnotationProperties getInstance() {
         return INSTANCE;
     }
 

@@ -9,14 +9,17 @@ import utility.exceptions.TextNotProcessedException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class MadlibBlanker {
+/** Processes Madlib through the "blanking" process, which takes the madlib's source text and blanks out certain words to be filled in later by the user.
+ * @see Madlib
+ * @see MadlibFiller
+ * @author Adam Barnett */
+class MadlibBlanker {
     /** Identifies where in the text file the words should be replaced with the user's new words */
     private static final Set<String> wordsToSkip = new HashSet<>();
+
+    /** Reference to Madlib's pos list to verify correct blanking of word. This is important in case the source text already has words within square brackets */
     private static final Map<String, String> posMap = Madlib.getPosMap();
 
     static {
@@ -54,13 +57,11 @@ public class MadlibBlanker {
         wordsToSkip.add("do");
     }
 
-    // ~~~~~ Methods for removing words from the source txt file ~~~~~
-
-    // Removes the skipper-th word with a part of speech in the posBlocks hashset
-    // int skipper determines the frequency of madlibification
-    // Example: if skipper == 3, madlibify will clear every third madlibifiable word
-    // returns ArrayList of parts of speech removed so user can replace the removed words when prompted by CLI
-    public ArrayList<String> removeMadlibifiables(String filepath, TextAnnotater annotatedText, int skipper) throws IOException, TextNotProcessedException {
+    /** Removes the skipper-th word with a part of speech in the posBlocks hashset
+     * @param skipper determines the frequency of madlibification (replacement of word with part-of-speech text block). Example: if skipper == 3, removeMadlibifiables will clear every third madlibifiable word
+     * @see Madlib for more skipper information
+     * @return returns List of parts of speech removed so user can replace the removed words when prompted by CLI */
+    public List<String> removeMadlibifiables(String filepath, TextAnnotater annotatedText, int skipper) throws IOException, TextNotProcessedException {
 
         if (skipper < 1) {
             skipper = 1;
@@ -103,14 +104,14 @@ public class MadlibBlanker {
                 }
             }
             System.out.println("Madlib skeleton successfully generated in src folder");
-            return posList;
+            return Collections.unmodifiableList(posList);
         }
         catch (Exception e) {
             throw new IOException("Madlibification failed. Please try again");
         }
     }
 
-    //& justWriteWord but handles Strings instead of tokens to print the part of speech returned by the part of speech map inside square brackets
+    /** Like justWriteWord but handles Strings instead of tokens to print the part of speech returned by the part of speech map inside square brackets */
     private void replaceWordWithBlock(boolean isFirstWord, BufferedWriter writer, String replacementBlock) throws IOException, InvalidPartOfSpeechException {
         if (!posMap.containsValue(replacementBlock)) {
             writer.write("[YouMessedUp]");
@@ -122,9 +123,8 @@ public class MadlibBlanker {
         else writer.write(" [" + replacementBlock + "]");
     }
 
-    /** Helper method for removeMadlibifiable() that writes each word to a file with a preceding space*/
-    //& Adds space before each word for simple avoidance of spaces before punctuation
-    //& Nothing is added to the punctuation character
+    /** Helper method for removeMadlibifiable() that writes each word to a file with a preceding space. Adds space before each word for simple avoidance of spaces before punctuation.
+     * Nothing is added to the punctuation character itself*/
     private void justWriteWord(CoreLabel token, BufferedWriter writer, boolean isFirstWord) throws IOException {
 
         if (token.word().matches("\\p{Punct}") || isFirstWord) {

@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/** Utility class that operates file loading from other classes to return the text that will be operated on */
 public abstract class TextFileLoader {
 
+    /** Returns the text of various states of madlib text so CLI and Madlib operate on Strings instead of files */
     public static String loadTextFile(Path path) throws IOException, NullPathException, TextNotProcessedException {
 
         if (path == null) throw new NullPathException("Path cannot be null");
