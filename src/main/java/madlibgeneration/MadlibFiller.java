@@ -44,7 +44,7 @@ class MadlibFiller {
 
     private static void replaceWord(Queue<String> replacementWords, String lastChar, boolean lastWord, BufferedWriter writer) throws IOException {
         // Check last character to check against regex
-        if (lastChar.matches("[.,\"!?]")) {
+        if (lastChar.matches("[.,\"!?;“”]")) {
             // Keep punctuation to append to replacement word if the word ends in punctuation
             // Don't add a space to the end if it's the last word on a line - mostly matters for testing
             if (lastWord) writer.write(replacementWords.poll() + lastChar);
