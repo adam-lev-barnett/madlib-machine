@@ -5,7 +5,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 import tagger.TextAnnotater;
-import utility.exceptions.InvalidPartOfSpeechException;
 import utility.exceptions.TextNotProcessedException;
 
 import java.io.*;
@@ -14,7 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MadlibCreatorTest {
+public class MadlibBlankerTest {
 
     @TempDir
     Path tempDir;
@@ -127,7 +126,7 @@ public class MadlibCreatorTest {
         assertEquals(posList6, allPartsOfSpeech);
 
         // Exception testing
-        assertThrows(IOException.class,  () -> new Madlib("testing madlib exception", null, 3));
+        assertThrows(TextNotProcessedException.class,  () -> new Madlib("testing madlib exception", null, 3));
 
     }
 

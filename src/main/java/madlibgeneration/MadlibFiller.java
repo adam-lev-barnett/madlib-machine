@@ -3,12 +3,12 @@ package madlibgeneration;
 import java.io.*;
 import java.util.Queue;
 
-public abstract class MadlibFiller {
+public class MadlibFiller {
 
     /**
      * Takes madlibified madlib (txt file with words replaced by [part of speech] blocks) and fills in with replacement word Queue
      */
-    public static void fillInMadlib(BufferedWriter writer, String blankedMadlib, Queue<String> replacementWords) throws IOException {
+    void fillInMadlib(BufferedWriter writer, String blankedMadlib, Queue<String> replacementWords) throws IOException {
 
         String[] words = blankedMadlib.split("\\s+");
 
