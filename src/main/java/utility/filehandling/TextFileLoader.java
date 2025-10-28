@@ -1,5 +1,7 @@
 package utility.filehandling;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import utility.exceptions.NullPathException;
 import utility.exceptions.TextNotProcessedException;
 
@@ -11,7 +13,8 @@ import java.nio.file.Path;
 public abstract class TextFileLoader {
 
     /** Returns the text of various states of madlib text so CLI and Madlib operate on Strings instead of files */
-    public static String loadTextFile(Path path) throws IOException, NullPathException, TextNotProcessedException {
+    @Contract("null -> fail")
+    public static @NotNull String loadTextFile(Path path) throws IOException, NullPathException, TextNotProcessedException {
 
         if (path == null) throw new NullPathException("Path cannot be null");
 

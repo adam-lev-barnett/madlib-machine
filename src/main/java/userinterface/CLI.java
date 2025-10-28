@@ -1,6 +1,7 @@
 package userinterface;
 
 import madlibgeneration.Madlib;
+import org.jetbrains.annotations.Nullable;
 import utility.exceptions.NullPOSListException;
 import utility.exceptions.TextNotProcessedException;
 import utility.filehandling.TextFileLoader;
@@ -86,7 +87,7 @@ public enum CLI {
     }
 
     /** Parsing logic to obtain a valid filepath for the text to be madlibified*/
-    private Path getSourceTxtFile(String filepath) {
+    private @Nullable Path getSourceTxtFile(String filepath) {
         Path originalTextPath = Paths.get(filepath);
         while (!Files.exists(originalTextPath)) {
             if (filepath.equalsIgnoreCase("quit")) return null;

@@ -1,5 +1,7 @@
 package madlibgeneration;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import tagger.TextAnnotater;
 import utility.exceptions.TextNotProcessedException;
 import utility.filehandling.TextFileLoader;
@@ -94,11 +96,7 @@ public class Madlib {
         this.originalText = originalText;
     }
 
-    private String getOriginalText() {
-        return originalText;
-    }
-
-    private void setAnnotatedText(String text) throws TextNotProcessedException {
+    private void setAnnotatedText(String text) {
         if (text == null) text = "";
         this.annotatedText = new TextAnnotater(text);
     }
@@ -112,7 +110,7 @@ public class Madlib {
         return Collections.unmodifiableList(this.posList);
     }
 
-    public static Map<String, String> getPosMap() {
+    public static @NotNull @UnmodifiableView Map<String, String> getPosMap() {
         return Collections.unmodifiableMap(posMap);
     }
 
