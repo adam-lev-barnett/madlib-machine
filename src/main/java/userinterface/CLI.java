@@ -2,12 +2,15 @@ package userinterface;
 
 import madlibgeneration.Madlib;
 import utility.exceptions.NullPOSListException;
+import utility.exceptions.NullPathException;
 import utility.exceptions.TextNotProcessedException;
 import utility.filehandling.TextFileLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,11 +39,15 @@ public enum CLI {
         System.out.println();
 
         System.out.println("Please enter filepath of .txt file or type \"quit\" to quit: ");
-        String filename = SCANNER.nextLine();
+        String filePath = SCANNER.nextLine();
 
-        String originalText = TextFileLoader.loadTextFile((getSourceTxtFile(filename)));
+        // returns null if user quits, and exits the program
+        Path originalTextPath = getSourceTxtFile(filePath);
 
-        System.out.println("What would you like to save your blanked madlib as?");
+        if (originalTextPath == null) System.out.println("I guess you don't want to madlib. There's nothing wrong with being a QUITTER. See ya next time!");
+        String originalText = TextFileLoader.loadTextFile(originalTextPath);
+
+        System.out.println("What would you like to save your blanked madlib as? Filename and/or path will be automatically appended with \".txt\"");
         String blankMadlibFilename = SCANNER.nextLine() + ".txt";
 
         /*  skipper variable: prompts user for how many madlibifiable words will be skipped before a madlibifiable word is blanked
@@ -82,19 +89,14 @@ public enum CLI {
 
     /** Parsing logic to obtain a valid filepath for the text to be madlibified*/
     private Path getSourceTxtFile(String filepath) {
-        File originalText;
-        while (true) {
+        Path originalTextPath = Paths.get(filepath);
+        while (!Files.exists(originalTextPath)) {
             if (filepath.equalsIgnoreCase("quit")) return null;
-            try {
-                originalText = new File(filepath);
-                break;
-            } catch (NullPointerException e) {
-                System.err.println("Invalid filepath.");
-                System.out.println("Please enter filepath of .txt file or type \"quit\" to quit: ");
-                filepath = SCANNER.nextLine();
-            }
+            System.err.println("Please enter a valid filepath or type \"quit\" to exit the program.");
+            filepath = SCANNER.nextLine();
+            originalTextPath = Paths.get(filepath);
         }
-        return originalText.toPath();
+        return originalTextPath;
     }
 
     /** Helper method to ensure user is entering a proper numerical value for the madlibifiable skipper variable*/
