@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/*
+ * Uses Stanford CoreNLP for part-of-speech tagging and tokenization.
+ * CoreNLP is © Stanford University and distributed under the GNU General Public License v3.
+ * See: https://stanfordnlp.github.io/CoreNLP/
+ */
+
 /** Provided text is converted to CoreDocument object, allowing the CoreNLP library to annotate parts of speech for each word
  * @see TextAnnotationProperties
  * @see madlibgeneration.Madlib*/

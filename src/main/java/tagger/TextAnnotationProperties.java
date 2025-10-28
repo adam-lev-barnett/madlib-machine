@@ -4,6 +4,12 @@ import java.util.Properties;
 
 import edu.stanford.nlp.pipeline.*;
 
+/*
+ * Uses Stanford CoreNLP for part-of-speech tagging and tokenization.
+ * CoreNLP is © Stanford University and distributed under the GNU General Public License v3.
+ * See: https://stanfordnlp.github.io/CoreNLP/
+ */
+
 /** Singleton that determines which properties words should be tagged with. The properties are then passed through a pipeline through which TextAnnotater parses source text to madlibify.
  * The only properties requested are the words themselves (tokens) and their parts of speech.
  * @see TextAnnotater
