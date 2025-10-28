@@ -2,11 +2,9 @@ package userinterface;
 
 import madlibgeneration.Madlib;
 import utility.exceptions.NullPOSListException;
-import utility.exceptions.NullPathException;
 import utility.exceptions.TextNotProcessedException;
 import utility.filehandling.TextFileLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -44,7 +44,7 @@ public class MadlibBlankerTest {
     }
 
     @Test
-    void testRemoveMadlibifiables(@TempDir Path tempDir) throws IOException, TextNotProcessedException {
+    void testRemoveMadlibifiables() throws IOException, TextNotProcessedException {
 
         String expectedOutput1 = "[pluralNoun], [noun]. I [verbPast] to the [noun] [noun] and [verbPast] some [noun]. Do you [verb] a [noun] [noun]?";
         String expectedOutput2 = "Greetings, [noun]. I ran to the [noun] today and [verbPast] some gum. Do you [verb] a baloney [noun]?";

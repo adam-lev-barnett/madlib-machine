@@ -24,7 +24,6 @@ class MadlibFiller {
             boolean lastWord = false;
             if (word == null) continue;
 
-            // If the replacement word queue is empty, continue simply copying words into the file
             if (word.equals(words[words.length - 1])) lastWord = true;
 
             // Clear any punctuation in the word to check if it's a legitimate part of speech block in MadlibCreator posMap
@@ -33,7 +32,12 @@ class MadlibFiller {
             // Check word syntax and replace based on conditionals, or else write the word as written (it's not madlibifiable)
             if (Madlib.getPosMap().containsValue(strippedWord) && replacementWords.peek() != null) {
                 replaceWord(replacementWords, Character.toString(word.charAt(word.length() - 1)), lastWord, writer);
-            } else writer.write(word + " ");
+
+            // If the replacement word queue is empty, continue simply copying words into the file
+            } else {
+                if (lastWord) writer.write(word);
+                else writer.write(word + " ");
+            }
         }
         System.out.println("Madlib successfully populated and saved to the src folder!");
     }
@@ -49,7 +53,8 @@ class MadlibFiller {
             // Don't add a space to the end if it's the last word on a line - mostly matters for testing
             if (lastWord) writer.write(replacementWords.poll() + lastChar);
             else writer.write(replacementWords.poll() + lastChar + " ");
-        } else {
+        }
+        else {
             writer.write(replacementWords.poll() + " ");
         }
     }
